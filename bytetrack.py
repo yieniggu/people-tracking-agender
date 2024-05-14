@@ -14,6 +14,7 @@ def main(folder, store, outputFolder):
     model = YOLO("yolov8n.pt")  # load a pretrained model (recommended for training)
     byte_tracker = sv.ByteTrack()
 
+    unique_ids = []
     info = []
 
     # init dataframe data
@@ -36,7 +37,7 @@ def main(folder, store, outputFolder):
         img = cv2.imread(folder + image, cv2.IMREAD_COLOR)
 
         img_rotated = cv2.resize(img, (height, width))
-        
+
         if store_set["rotate"] is not None:
             img_rotated = cv2.rotate(img_rotated, store_set["rotate"])
 
@@ -61,7 +62,7 @@ def main(folder, store, outputFolder):
             print("agender: ", agender)
 
             img_rotated, info = compare_centroids(detections, agender, store_set["coords"], img_rotated)
-            
+
         print("#"*100)
 
         labels = [
@@ -83,12 +84,13 @@ def main(folder, store, outputFolder):
         splitted_image = image.split(".")
         splitted_folder = folder.split("/")
         print("splitted_folder: ", splitted_folder)
+        print("tracker ids: ", ids)
         format_date = splitted_folder[-2] + " " + splitted_image[0].replace("-", ":")
         date = pd.to_datetime(format_date, format="%Y-%m-%d %H:%M:%S")
         hours.append(date)
         ids.append(detections.tracker_id)
         agenders.append(info)
-        
+
         # cv2.imwrite(outputFolder + "results/"+ image, frame)
 
         cv2.imshow("yolov8", frame)
@@ -97,7 +99,7 @@ def main(folder, store, outputFolder):
             cv2.destroyAllWindows()
             sys.exit()
 
-        
+
     print("Generating dataframe...")
     df = pd.DataFrame(columns=["hour_minute_second", "person_ids", "agenders"])
     df.hour_minute_second = hours
@@ -115,7 +117,7 @@ def compare_centroids(detections, agender, coords, img):
     # taken centroids
     taken = []
     info = []
-    
+
     # iterate over agender centroids
     for detected in agender:
         if detected["region"]["x"] != 0 and detected["region"]["y"] != 0:
@@ -125,7 +127,7 @@ def compare_centroids(detections, agender, coords, img):
             print("face centroid: {} - box: {}".format(face_centroid, coords))
 
             # check if centroid is inside zone
-            x, y = face_centroid 
+            x, y = face_centroid
             if not (x > coords["x1"] and x < coords["x2"] and y > coords["y1"] and y < coords["y2"]):
                 print("face centroid outside boundaries...")
                 continue
@@ -133,9 +135,9 @@ def compare_centroids(detections, agender, coords, img):
             min_distance = 10000
             min_centroid = None
             for indx, detection in enumerate(detections.xyxy):
-                detection_centroid = (int((detection[0]+detection[2])/2), 
+                detection_centroid = (int((detection[0]+detection[2])/2),
                                       int((detection[1]+detection[3])/2))
-                
+
                 dx, dy = detection_centroid
 
                 # get distance between points
@@ -150,7 +152,7 @@ def compare_centroids(detections, agender, coords, img):
                     info.append({"id": detections.tracker_id[indx] ,"gender": detected["dominant_gender"], "age": detected["age"]})
 
             color_list = list(np.random.random(size=3) * 256)
-            
+
             # draw centroids
             img = cv2.line(img, face_centroid, min_centroid, (255, 255, 255), 2)
             img = cv2.circle(img, face_centroid, 5, color_list, -1)
@@ -179,7 +181,7 @@ if __name__ == "__main__":
                         "--outputFolder",
                         help="Path to the folder where to save the results",
                         type=str)
-                        
+
 
     args = parser.parse_args()
 

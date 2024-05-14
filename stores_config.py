@@ -33,7 +33,7 @@ stores = {
         "type": "box-restricted",
         "coords":{
             "x1": 0,
-            "y1": 420,
+            "y1": 360,
             "x2": 480,
             "y2": 680
         },

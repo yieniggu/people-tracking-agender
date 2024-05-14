@@ -1,4 +1,6 @@
 __pycache__
 data
 *.zip
-*.pt
+yolov8n.pt
+*.avi
+*.csv
