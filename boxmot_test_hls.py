@@ -16,8 +16,8 @@ import subprocess
 s3 = boto3.client("s3")
 rekognition = boto3.client('rekognition')
 
-video_url = "http://34.136.224.56:8088/hls/puente-test-2024_05_14-raw.m3u8"
-output_url = "rtmp://34.136.224.56:1935/live/puente-test-2024_05_14-processed"
+video_url = "http://34.136.224.56:8088/hls/puente-demo-2024_05_14-raw.m3u8"
+output_url = "rtmp://34.136.224.56:1935/live/puente-demo-2024_05_14-processed"
 
 
 
